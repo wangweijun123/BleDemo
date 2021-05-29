@@ -1,6 +1,17 @@
 apply plugin: 'com.huawei.ohos.hap'
 apply plugin: 'com.huawei.ohos.decctest'
 ohos {
+    signingConfigs {
+        debug {
+            storeFile file('../sign/keystore.p12')
+            storePassword '0000001BC248008F6D3FD450DE0C660F93D94C38DB61334325BE3DB3ECD4DBF6B4146B1D1A3E613A2406C7'
+            keyAlias = 'mykey'
+            keyPassword '0000001B9FF08797B668EBD6405FA99CE40B3041C85921243BA7AD66B0B789E0A44003843F6AB870E43F78'
+            signAlg = 'SHA256withECDSA'
+            profile file('../sign/myprofileDebug.p7b')
+            certpath file('../sign/ble_debug.cer')
+        }
+    }
     compileSdkVersion 5
     defaultConfig {
         compatibleSdkVersion 4
@@ -13,7 +24,7 @@ ohos {
             }
         }
     }
-    
+
 }
 
 dependencies {
@@ -22,5 +33,5 @@ dependencies {
     ohosTestImplementation 'com.huawei.ohos.testkit:runner:1.0.0.100'
 }
 decc {
-    supportType = ['html','xml']
+    supportType = ['html', 'xml']
 }
