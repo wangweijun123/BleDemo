@@ -1,4 +1,44 @@
-keystore.p12
+手机与硬件设备ble蓝牙连接
+serviceId, writeChracterId, notifyCharacterId, enableNofiy(true), writeDescriptor(必须写)
+1 扫描获取支持蓝牙通信的设备(通过serviceId过滤自己需要的硬件的，也是厂家提供，
+获取支持本服务的硬件mac地址用于蓝牙连接)
 
-key store password: Wangwj_1027
-alias: mykey
+2， 连接之后发现服务(必须调用,如果不调用，后面写与通知的对象无法实例化)，
+这个时候需要另外两个ID, writeChracterId，notifyCharacterId,
+通过writeChracterId找到可以写的特征，
+通过notifyCharacterId找到监听硬件发送过来的消息,同时(必须写描述值才)能接受到消息
+，nrf connect工具都可以看到这些
+
+3 两个手机连接一个设备的情况:
+
+4 初始化写特征值与nofity的特征值以及写好描述值之后，必须延时(暂定1秒，可以更短)发送私有命令才能获取到
+
+NFC 近距离通信，一般是读取， 读mac地址
+
+
+直连: 借助于NFC,读取mac地址,优化连接, nrfConnect 工具
+
+
+中心设备(手机)与外围设备(筋膜枪，血糖仪)蓝牙通信的整体流程
+
+筋膜枪开机:
+发送广播(广播中包含serviceUUid,服务一个标识，还有macaddress,同时添加自己所支持的服务，以及服务下特征值列表(write,nofity)),
+这时候应用扫描, scanDevice,带上serviceuuid(128byte)，与设备匹配，代表我只想和有这种服务的设备通信,发现设备之后，手机停止设备扫描，
+开始根据macaddress建立连接,与android 不一样没有确认弹框, 脸上之后，手机与设备都是收到callback,  设备端脸上之后停止广播
+(低功耗，当然哪种一对多服务时不会停止广播的), 手机端开始发现服务,目的是找到对应的serviceuuid下的特征值列表
+list<GattCharactor>(write, notify), 找到write,notify之后，必须启用通知(就是设备能写数据给你,否则没法收到对方的通知),同时必须
+写描述值(不然也收不到通知),到这里就可以愉快的通信了，通信有限制，一次不能超过20字节[], 筋膜枪文档上都是16进制，最终是以二进制byte[]发送
+所以这里，进制有转化， 16进制 -->  10进制 --> 2进制 (例: 16进制表示"ac" ->int re =  Integer.parseInt("ac", 16)
+得到10进制然后强转, byte bb = (byte)re), 命令数据格式【帧头+命令+数据长度+数据+校验和+帧尾】, 不能超过20个字节，所以就会
+出现分包的情况帧尾标识, 最后 close connection
+
+难点:
+0 连接优化,通过nfc(碰一碰)直连的方式,达到0~2秒连， 从之前5秒左右的时间优化
+1 设备与应用的启动顺序, 设备先启动(控制模块(启动速度慢)与蓝牙模块(启动速度快)),
+  后启动app，建立连接后，设备控制还咩有启动完成
+2 用户手动禁用定位权限,进程死掉,重新拉起,启动参数带过来
+  js(异步与同步) 接口 <----> 对应着  java 接口
+3 C/S 模拟设备程序编写
+
+
+
