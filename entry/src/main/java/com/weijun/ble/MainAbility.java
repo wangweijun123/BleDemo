@@ -1,16 +1,17 @@
 package com.weijun.ble;
 
-import ohos.ace.ability.AceAbility;
+import com.weijun.ble.slice.MainAbilitySlice;
+
+import ohos.aafwk.ability.Ability;
 import ohos.aafwk.content.Intent;
 
-public class MainAbility extends AceAbility {
+public class MainAbility extends Ability {
     @Override
     public void onStart(Intent intent) {
-        super.onStart(intent);
-    }
+        String[] permissions = {"ohos.permission.LOCATION"};
+        requestPermissionsFromUser(permissions, 0);
 
-    @Override
-    public void onStop() {
-        super.onStop();
+        super.onStart(intent);
+        super.setMainRoute(MainAbilitySlice.class.getName());
     }
 }
